@@ -87,5 +87,30 @@ def scrape_youtube(video_ids):
     save_channel_data_df(df, infos["channel"][0])
     return df
 
-# def get_channel_data_df(channel_name):
+def get_channel_data_df(channel_name):
+    file_path = os.path.join(get_data_path(), channel_name, channel_name + ".csv")
+    df = pd.read_csv(file_path)
+    return df
+
+def get_channel_list():
+    data_path = get_data_path()
+    return os.listdir(data_path)
+
+def fetch_videoid(path, channel_name):
+    channel_dir = os.path.join(get_data_path(), channel_name)
+    video_id = path.replace(channel_dir, "").split(".")[0][1:]
+    return video_id
     
+def scrape_channel_id_and_icon(url):
+    icon_link = channel_id = None
+    response = requests.get(url)
+    soup = bs(response.text, 'html.parser')
+
+    for link in soup.find_all("link", href=True):
+        href = link["href"]
+        if href.startswith('https://yt3.googleusercontent.com'):
+            icon_link = href
+        elif href.startswith('https://www.youtube.com/channel'):
+            channel_id = href.replace("https://www.youtube.com/channel/","")
+
+    return icon_link, channel_id
