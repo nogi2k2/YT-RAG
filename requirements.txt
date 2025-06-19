@@ -1,0 +1,11 @@
+streamlit
+langchain
+sentence-transformers
+langchain_community
+langchain_openai
+qdrant_client
+
+scrapetube
+youtube-transcript-api
+bs4
+stqdm
