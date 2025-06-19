@@ -2,7 +2,6 @@ streamlit
 langchain
 sentence-transformers
 langchain_community
-langchain_openai
 qdrant_client
 
 scrapetube
