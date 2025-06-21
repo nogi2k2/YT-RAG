@@ -85,7 +85,7 @@ def fetch_transcript(df):
         progress_bar.progress((index+1)/len(video_id_list))
         if is_trans_fetched[index] == False:
             transcript = youtube_service.get_single_utube_transcript(video_id)
-            create_trans_txt_file(title_list[index], description_list[index], channel_name, video_id, transcript)
+            create_trans_txt_file(title_list[index], channel_list[index], description_list[index], video_id, transcript)
             llm_service.create_kb(channel_name, video_id)
             df.loc[index, "transcript"] = transcript
             df.loc[index, "is_trans_fetched"] = True
@@ -116,6 +116,7 @@ if page == const.YT_EXTRACT_PAGE:
         
         for id in video_ids:
             video_id_list.append(id["videoId"])
+        print(len(video_id_list))
 
         num_videos = len(video_id_list)
         df, channel_name = scrape_youtube(video_id_list)
