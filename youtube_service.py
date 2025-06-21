@@ -5,6 +5,7 @@ import pandas as pd
 import json
 from bs4 import BeautifulSoup as bs
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
 
 def get_video_details(soup):
     title = channel = description = video_id = external_links = None
@@ -22,11 +23,18 @@ def get_video_details(soup):
 def get_single_utube_transcript(video_id):
     try:
         transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-        for transcript in transcript_list:
-            transcript_en = transcript.translate("en").fetch()
-            transcript_en_text = " ".join([segment["text"] for segment in transcript_en])
-            return transcript_en_text
-    except Exception as e:
+
+        if transcript_list.find_manually_created_transcript(['en']):
+            transcript = transcript_list.find_manually_created_transcript(['en'])
+            transcript_text = " ".join([segment["text"] for segment in transcript.fetch()])
+            return transcript_text
+
+        elif transcript_list.find_generated_transcript(['en']):
+            transcript = transcript_list.find_generated_transcript(['en'])
+            transcript_text = " ".join([segment["text"] for segment in transcript.fetch()])
+            return transcript_text
+
+    except (TranscriptsDisabled, NoTranscriptFound) as e:
         print(f"Transcript fetch failed for video: {video_id}: {e}")
     
     return None
@@ -56,7 +64,7 @@ def get_data_path():
 def save_channel_data_df(df, channel_name):
     channel_path = os.path.join(get_data_path(), channel_name)
     file_path = os.path.join(get_data_path(), channel_name, channel_name+".csv")
-    os.makedirs(channel_path, exists_ok = True)
+    os.makedirs(channel_path, exist_ok = True)
     df.to_csv(file_path, index = False)
 
 def scrape_youtube(video_ids):
